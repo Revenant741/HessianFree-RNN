@@ -8,8 +8,11 @@ HessianFreeをRNNに適応することを目的にしています
   `$docker start -i my-esn`
   
   通常のRNNの実行
+
   `$python3 src/train.py`
+  
   hessianfree法のRNN適応の実行
+  
   `$python3 src/hessian_train.py`
 
 # 目的の流れ
@@ -32,7 +35,7 @@ HessianFreeをRNNに適応することを目的にしています
   精度は十分高いようだけど，そうなるとhessian-free法の実装は意味があるのか？
 
 
-#　実装におけるチェックポイント
+# 実装におけるチェックポイント
 
   データ・セットと正解データが上手く出来ているか？
 
