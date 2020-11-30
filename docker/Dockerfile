@@ -24,11 +24,14 @@ RUN groupadd -o -g $D_GID $D_USER \
  && useradd -m -o -u $D_UID -g $D_GID $D_USER
 
 RUN pip install \
+        toml\
         numpy\
         tensorflow \
         matplotlib \
         deap  \
-        pandas
+        pandas \
+        scikit-learn\
+        tensorboard
 
 USER $D_USER
 
