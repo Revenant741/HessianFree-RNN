@@ -293,14 +293,12 @@ class HessianFree(torch.optim.Optimizer):
         """
         #print("Gv")
         Jv = self._Rop(output, self._params, vec)
-        #print(f'output{output}')
-        #print(f'loss{loss}')
-        gradient = torch.autograd.grad(loss, output, create_graph=True)
-        print(f'gradient{gradient}')
+        gradient = torch.autograd.grad(loss, output, create_graph=True,allow_unused=True)
+        #print(f'gradient{gradient}')
         HJv = self._Rop(gradient, output, Jv)
 
         JHJv = torch.autograd.grad(
-            output, self._params, grad_outputs=HJv.reshape_as(output), retain_graph=True)
+            output, self._params, grad_outputs=HJv.reshape_as(output),retain_graph=True)
 
         #ティホノフダンピング（セクション20.8.1
         #print(f'gus{parameters_to_vector(JHJv).detach() + damping * vec}')

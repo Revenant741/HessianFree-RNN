@@ -44,7 +44,7 @@ def make_seed_patt():
   random.shuffle(patterns)
   return patterns
 
-def make_train(t_long=16):
+def make_train(t_long=15):
   patterns = make_seed_patt()
   #学習データの作成
   change_switch = random.randint(0,1)
@@ -61,7 +61,7 @@ def make_train(t_long=16):
 
   return traindata, train
 
-def make_test(t_long=32):
+def make_test(t_long=30):
   patterns = make_seed_patt()
 
   #シャッフルの後，評価データの作成

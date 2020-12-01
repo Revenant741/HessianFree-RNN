@@ -14,24 +14,22 @@ def test(model,testdata,loss_func,optimizer,sp_test,tp_test):
   sp_total_loss = 0
   tp_total_loss = 0
   #テストデータをスライス
-  for i in range(testdata.shape[1]-1):
-    step_input = testdata[:16,i:i+1].T
+  for i in range(0,testdata.shape[1],10):
+    step_input = testdata[:16,i:i+10].T
     #精度の算出
     sp_out, tp_out = model(step_input)
-    sp_right = torch.max(sp_out,1)[1].eq(sp_test[i:i+1]).sum().item()
-    tp_right = torch.max(tp_out,1)[1].eq(tp_test[i:i+1]).sum().item()
-    if sp_right == 1:
-      sp_right_ans +=1
-    if tp_right == 1:
-      tp_right_ans +=1
+    sp_right = torch.max(sp_out,1)[1].eq(sp_test[i:i+10]).sum().item()
+    tp_right = torch.max(tp_out,1)[1].eq(tp_test[i:i+10]).sum().item()
+    sp_right_ans += sp_right
+    tp_right_ans += tp_right
     #誤差の算出
-    sp_loss = loss_func(sp_out,sp_test[i:i+1])
-    tp_loss = loss_func(tp_out,tp_test[i:i+1])
+    sp_loss = loss_func(sp_out,sp_test[i:i+10])
+    tp_loss = loss_func(tp_out,tp_test[i:i+10])
     sp_total_loss += sp_loss
     tp_total_loss += tp_loss
   #誤差
   sp_loss = sp_total_loss.data/list(sp_test.shape)[0]
-  tp_loss = tp_total_loss.data/list(sp_test.shape)[0]
+  tp_loss = tp_total_loss.data/list(tp_test.shape)[0]
   #精度
   sp_acc = sp_right_ans/list(sp_test.shape)[0]
   tp_acc = tp_right_ans/list(tp_test.shape)[0]
@@ -41,16 +39,16 @@ def train(model,traindata,loss_func,optimizer,sp_train,tp_train):
   optimizer.zero_grad()
   loss = 0
   #学習データをスライス
-  for i in range(traindata.shape[1]):
-    step_input = traindata[:16,i:i+1].T
+  for i in range(0,traindata.shape[1],10):
+    #print(i)
+    step_input = traindata[:16,i:i+10].T
     sp_out, tp_out = model(step_input)
-    sp_loss = loss_func(sp_out,sp_train[i:i+1])
-    tp_loss = loss_func(tp_out,tp_train[i:i+1])
+    sp_loss = loss_func(sp_out,sp_train[i:i+10])
+    tp_loss = loss_func(tp_out,tp_train[i:i+10])
     loss += sp_loss + tp_loss
-    if i%10 == 0:
-      loss.backward(retain_graph=True)
-      optimizer.step()
-      loss = 0
+    loss.backward(retain_graph=True)
+    optimizer.step()
+    loss = 0
 
 def main(Model, epoch_num):
   epochs = []
@@ -60,8 +58,8 @@ def main(Model, epoch_num):
   tp_accuracys = []
   model = Model().cuda()
   loss_func = nn.CrossEntropyLoss()
-  #optimizer = torch.optim.Adam(model.parameters())
-  optimizer = torch.optim.SGD(model.parameters(),lr=0.0001,momentum=0.9)
+  optimizer = torch.optim.Adam(model.parameters())
+  #optimizer = torch.optim.SGD(model.parameters(),lr=0.0001,momentum=0.9)
   for epoch in range(epoch_num):
     for iteration in range(7):
       #7回毎に変わる学習データ

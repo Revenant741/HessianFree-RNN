@@ -12,20 +12,19 @@ def test(model,testdata,loss_func,optimizer,test_ans):
   right_ans = 0
   total_loss = 0
   #テストデータをスライス
-  for i in range(testdata.shape[1]-1):
-    step_input = testdata[:16,i:i+1].T
+  for i in range(0,testdata.shape[1],10):
+    step_input = testdata[:16,i:i+10].T
     #精度の算出
     out = model(step_input)
-    right = torch.max(out,1)[1].eq(test_ans[i:i+1]).sum().item()
-    if right == 1:
-      right_ans +=1
+    right = torch.max(out,1)[1].eq(test_ans[i:i+10]).sum().item()
+    right_ans +=right
     #誤差の算出
-    loss = loss_func(out,test_ans[i:i+1])    
+    loss = loss_func(out,test_ans[i:i+10])
     total_loss += loss
   #誤差
-  loss = total_loss.data/list(test_ans.shape)[0]
+  loss = total_loss.data/(list(test_ans.shape)[0])
   #精度
-  acc = right_ans/list(test_ans.shape)[0]
+  acc = right_ans/(list(test_ans.shape)[0])
   return acc,loss
   
 def train(model,traindata,loss_func,optimizer,train_ans):
@@ -33,20 +32,17 @@ def train(model,traindata,loss_func,optimizer,train_ans):
   optimizer.zero_grad()
   loss = 0
   #学習データをスライス
-  for i in range(traindata.shape[1]):
-    step_input = traindata[:16,i:i+1].T
+  for i in range(0,traindata.shape[1],10):
+    step_input = traindata[:16,i:i+10].T
     out = model(step_input)
-    loss += loss_func(out,train_ans[i:i+1])
-    out_list += out
+    loss = loss_func(out,train_ans[i:i+10])
+    #print(loss)
     def closure():
-        return loss, out_list
-    if i%10 == 0:
-      loss.backward(retain_graph=True)
-      losses, outs=closure()
-      #print(f'backloss{outs}')
-      optimizer.step(closure)
-      loss = 0
-      out_list = 0
+        return loss, out
+    loss.backward(retain_graph=True)
+    loss, outs=closure()
+    optimizer.step(closure)
+
 
 def main(Model, epoch_num):
   epochs = []
@@ -54,7 +50,8 @@ def main(Model, epoch_num):
   accuracys = []
   model = Model().cuda()
   loss_func = nn.CrossEntropyLoss()
-  optimizer = hessianfree.HessianFree(model.parameters())
+  #optimizer = hessianfree.HessianFree(model.parameters())
+  optimizer = torch.optim.Adam(model.parameters())
   for epoch in range(epoch_num):
     for iteration in range(7):
       #7回毎に変わる学習データ
@@ -102,8 +99,8 @@ def make_image(epoch, accuracy, loss):
   plt.plot(epoch, accuracy, label="spatial")
   #plt.ylim(0,0.7)
   plt.legend(loc=0)
-  plt.savefig(f'img/hessan_acc.png')
+  plt.savefig(f'img/hessian_acc.png')
 
 if __name__ == '__main__':
-  epoch, accuracy, loss = main(rnn_model.Simple_Model,10)
+  epoch, accuracy, loss = main(rnn_model.Simple_Model,100)
   make_image(epoch, accuracy, loss)
