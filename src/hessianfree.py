@@ -293,7 +293,7 @@ class HessianFree(torch.optim.Optimizer):
         """
         #print("Gv")
         Jv = self._Rop(output, self._params, vec)
-        gradient = torch.autograd.grad(loss, output, create_graph=True,allow_unused=True)
+        gradient = torch.autograd.grad(loss, output, create_graph=True)
         #print(f'gradient{gradient}')
         HJv = self._Rop(gradient, output, Jv)
 
